@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Prozhi.com</title>
+<link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="static/layui/css/layui.css">
+<style>
+	.layui-logo a {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 100%;
+		line-height: 60px;
+		text-align: center;
+		color: #009688;
+		font-size: 16px;
+	}
+	.layui-body {
+		padding:15px;
+	}
+</style>
+{% block CSS %} {% end %}
+</head>
+<body>
+	<div class="layui-layout layui-layout-admin">
+	  <div class="layui-header">
+		<div class="layui-logo"><a href="/index">FTP</a></div>
+		<!-- 头部区域（可配合layui已有的水平导航） -->
+		<ul class="layui-nav layui-layout-left">
+		  <li class="layui-nav-item"><a href="">控制台</a></li>
+		</ul>
+		<ul class="layui-nav layui-layout-right">
+			<li class="layui-nav-item"><a>欢迎你! {{username}}</a></li>
+		  	<li class="layui-nav-item"><a href="/logout?logout={{ username }}" class="logout">退出</a></li>
+		</ul>
+	  </div>
+
+	  <div class="layui-side layui-bg-black">
+		<div class="layui-side-scroll">
+		  <ul class="layui-nav layui-nav-tree" >
+			  <li class="layui-nav-item">
+				  <a><div class="time"><h2></h2></div></a>
+			  </li>
+			  <li class="layui-nav-item">
+				<a href="javascript:;">FTP上传文件</a>
+			  </li>
+		  </ul>
+		</div>
+	  </div>
+
+	  <div class="layui-body">
+		{% block Body %} {% end %}
+	  </div>
+
+	  <div class="layui-footer">
+		© Thorgene
+	  </div>
+	</div>
+	<script src="static/plugins/jquery-1.12.4.js"></script>
+    <script src="static/plugins/jquery.cookie.js"></script>
+	<script src="static/layui/layui.js"></script>
+	<script>
+		//JavaScript代码区域
+		layui.use('element', function(){
+		  var element = layui.element;
+
+		});
+	</script>
+
+	<script>
+		/* Ajax 初始化请求操作*/
+		$(function () {
+			$.ajaxSetup({
+				beforeSend: function (xhr, settings) {
+					xhr.setRequestHeader('X-CSRFtoken', $.cookie('_xsrf'));
+				}
+			});
+		});
+
+		/* 获取时间 */
+		function get_ctime() {
+			var data = new Date();
+			var ch = data.getHours();
+			var cM = data.getMinutes();
+			var ctime_m = ch + ':' + cM;
+			var ctime = ch + ' ' + cM;
+			var cy = data.getFullYear();
+			var cm = data.getMonth() + 1;
+			var cd = data.getDate();
+			var cj = data.getDay();
+			var cdata = '星期' + cj + ' ' + cy + '年' + cm + '月' + cd + '日';
+			if($('.time>h2').text().indexOf(":") > 0 ){
+				$('.time>h2').text(ctime + ' | ' + cdata);
+			}else{
+				$('.time>h2').text(ctime_m + ' | ' + cdata);
+			}
+		}
+
+		/* 定时更新时间 */
+		$(function () {
+			get_ctime();
+			setInterval('get_ctime()',1000)
+		});
+
+		document.addEventListener("visibilitychange", function () {
+			if (document.hidden) {
+				$('title').text('Prozhi.com');
+			} else  {
+			   	$('title').text('欢迎回来ヽ(✿ﾟ▽ﾟ)ノ');
+				setTimeout("$('title').text('Prozhi.com');",5000);
+			}
+		}, false);
+    </script>
+	{% block JS %} {% end %}
+</body>
+</html>

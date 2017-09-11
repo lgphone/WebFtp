@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Login</title>
+<link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="static/layui/css/layui.css">
+	<style>
+		body {
+			margin:0;
+		}
+
+        .hide {
+            display: none;
+        }
+
+		.context {
+			position: relative;
+			margin: 0 auto;
+			left: 0;
+			right: 0;
+			width: 600px;
+			height: 400px;
+			top: 100px;
+		}
+		.form-data {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 60px;
+			margin: 0 auto;
+		}
+
+
+		.context div {
+			line-height: 50px;
+		}
+
+        .error-msg {
+            color: red;
+        }
+
+		.footer {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			height: 44px;
+			line-height: 44px;
+			padding: 0 15px;
+			background-color: #eee;
+			text-align: center;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+        <!--<div class="layui-logo">Welcome</div>-->
+            <ul class="layui-nav layui-layout-left">
+                <li class="layui-nav-item">FTP上传下载系统</li>
+            </ul>
+        </div>
+        <div class="context ">
+            <div class="error-msg"></div>
+            <div class="form-data layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="username"  id="username" placeholder="请输入用户名" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="password" id="password" placeholder="请输入密码" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-big layui-btn-normal  btn-login" onclick="SubmitLogin(this);">
+                            <div>&nbsp登录&nbsp</div>
+                            <span class="hide">
+                                <img src="static/layui/css/modules/layer/default/loading-0.gif">
+                                <span>正在登录</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+	  <div class="footer">
+		<!-- 底部固定区域 -->
+		© Prozhi.com 版权所没有
+	  </div>
+	</div>
+    <script src="static/plugins/jquery-1.12.4.js"></script>
+    <script src="static/plugins/jquery.cookie.js"></script>
+	<script src="static/layui/layui.js"></script>
+    <script>
+        /* Ajax 请求操作*/
+        $(function () {
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader('X-CSRFtoken', $.cookie('_xsrf'));
+                }
+            });
+        });
+        /* 检测回车键 */
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                $(".btn-login").click();
+            }
+        });
+
+        /* 登录提交*/
+        function SubmitLogin(ths){
+            $('.error-msg').empty();
+            $(ths).children(':eq(0)').addClass('hide');
+            $(ths).addClass('not-allow').children(':eq(1)').removeClass('hide');
+            var post_dict = {};
+            $('.form-data input').each(function(){
+                post_dict[$(this).attr("name")] = $(this).val();
+            });
+            console.log(post_dict);
+            $.ajax({
+                url: '/login',
+                type: 'POST',
+                data: post_dict,
+                dataType: 'json',
+                success: function(arg){
+                    if(arg.status === 'true'){
+                        $('.error-msg').text(arg.message);
+                        window.location.href = '/index';
+                    }else{
+                        $('.error-msg').text(arg.message);
+                    }
+                }
+            });
+            $(ths).removeClass('not-allow').children(':eq(1)').addClass('hide');
+            $(ths).children(':eq(0)').removeClass('hide');
+        }
+    </script>
+</body>
+</html>

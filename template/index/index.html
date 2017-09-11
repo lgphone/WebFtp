@@ -1,0 +1,139 @@
+{% extends '../master/layout.html'%}
+{% block CSS%}
+<style>
+  .tips {
+    margin: 20px;
+    font-weight: bold;
+    color: #1E9FFF;
+    font-size: large;
+  }
+  #file{
+    margin-bottom:20px;
+  }
+  .layui-input-block {
+    margin-bottom:30px;
+  }
+  .file_info {
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: medium;
+    color: red;
+  }
+
+  .upload_file_status {
+    font-weight: bold;
+    color: #009688;
+    font-size: medium;
+  }
+  .layui-table {
+    width: 1000px;
+  }
+</style>
+{% end %}
+
+{% block Body %}
+
+<div class="layui-form">
+  <div class="tips">请在下面提交文件点击上传即可</div>
+  <div class="layui-form-item">
+    <label class="layui-form-label"></label>
+    <div class="layui-input-inline">
+      <input type="file" name="file" id="file" onchange="file_info();">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn upload_button" onclick="UploadFile(this);">上传文件</button>
+    </div>
+    <div class="layui-input-block">
+      <div class="file_info">文件信息</div>
+      <div class="upload_file_status"></div>
+    </div>
+  </div>
+  {% raw xsrf_form_html() %}
+  <table class="layui-table">
+    <colgroup>
+      <col width="300">
+      <col width="150">
+      <col width="150">
+      <col width="260">
+      <col width="100">
+      <col>
+    </colgroup>
+    <thead>
+      <tr>
+        <th>文件名</th>
+        <th>文件MD5</th>
+        <th>文件大小</th>
+        <th>创建时间</th>
+        <th>下载按钮</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for file in file_list %}
+      <tr>
+        <td>{{ file[0] }}</td>
+        <td>{{ file[1] }}</td>
+        <td>{{ file[2] }}</td>
+        <td>{{ file[3] }}</td>
+        <td><a href="/download/{{ file[0] }}" class="layui-btn">下载</a></td>
+      </tr>
+      {% end %}
+    </tbody>
+  </table>
+</div>
+{% end %}
+
+{% block JS %}
+<script>
+  function file_info() {
+      var fileObj = $("#file")[0].files[0];
+      var fname = fileObj.name;
+      var fsize = fileObj.size;
+      var file_status = '文件名:' + fname + '  大小:' +  fsize/1024/1024 + ' MB';
+      $('.upload_file_status').text(file_status);
+  }
+
+  function UploadFile(){
+      var fileObj = $("#file")[0].files[0];
+      console.log(fileObj);
+      if (typeof(fileObj) === 'undefined'){
+          layui.use('layer', function(){
+            var layer = layui.layer;
+            layer.msg('请先选择文件');
+          });
+          return
+      }
+      $('.upload_button').text('上传中....').addClass('layui-btn-disabled').attr("disabled","true");
+      var form = new FormData();
+      form.append("upload_file", fileObj);
+      $.ajax({
+          type:'POST',
+          url: '/upload',
+          data: form,
+          processData: false,  // tell jQuery not to process the data
+          contentType: false,  // tell jQuery not to set contentType
+          success: function(arg){
+              arg = JSON.parse(arg);
+              console.log(arg);
+              if(arg.status){
+                    layui.use('layer', function(){
+                      var layer = layui.layer;
+                      layer.msg('上传成功');
+                    });
+                    $('.upload_button').text('上传文件').removeClass('layui-btn-disabled').removeAttr('disabled');
+                    window.location.reload()
+              }else{
+                  var error_msg = '上传失败:' + arg.message;
+                  layui.use('layer', function(){
+                      var layer = layui.layer;
+                      layer.msg(error_msg);
+                    });
+//                  console.log(arg.message);
+              }
+          }
+      });
+  }
+
+</script>
+{% end %}

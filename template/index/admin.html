@@ -1,0 +1,161 @@
+{% extends '../master/layout.html'%}
+{% block CSS%}
+<style>
+  .layui-input-block {
+    margin-bottom:30px;
+  }
+  .layui-table {
+    width: 1000px;
+  }
+  .add-user-form {
+    position: absolute;
+    /*z-index: 1200;*/
+    margin: 0 auto;
+    /*width: 300px;*/
+    /*height: 200px;*/
+  }
+  .hide{
+    display: none;
+  }
+
+  .click-out {
+    /*background-color: #33CCFF;*/
+    z-index: 15000;
+    /*position: fixed;*/
+    /*margin-top:0;*/
+    width: 600px;
+    height: 300px;
+  }
+  .add-user-form {
+    margin-top: 40px;
+    margin-left: 50px;
+
+  }
+  .add-notify {
+    margin: 20px;
+    margin-left: 60px;
+    color: red;
+    font-weight: bold;
+  }
+</style>
+{% end %}
+
+{% block Body %}
+
+<div class="layui-form body">
+  <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal add-user" onclick="AddUerClick();">添加用户</button>
+  <table class="layui-table">
+    <colgroup>
+      <col width="150">
+      <col width="150">
+      <col width="260">
+      <col width="100">
+      <col>
+    </colgroup>
+    <thead>
+      <tr>
+        <th>用户名</th>
+        <th>密码</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in user_list %}
+      <tr>
+        <td>{{ user[0] }}</td>
+        <td>{{ user[1] }}</td>
+        <td>{{ user[2] }}</td>
+        <td><button username="{{ user[0] }}" class="layui-btn layui-btn-danger del-user" onclick="DelUser(this);">删除用户</button></td>
+      </tr>
+      {% end %}
+    </tbody>
+  </table>
+  <div class="Model"></div>
+</div>
+
+<div class="click-out hide">
+  <div class="add-user-form site-text site-block">
+    <div class="layui-form">
+      <div class="layui-form-item">
+        <label class="layui-form-label">用户</label>
+        <div class="layui-input-inline">
+          <input type="text" id="username" required="" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-inline">
+          <input type="password" id="password" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input" >
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn" onclick="AddUer();">立即提交</button>
+          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<div class="add-notify"></div>
+</div>
+
+{% end %}
+
+{% block JS %}
+<script>
+    function DelUser(ths) {
+        var username = $(ths).attr('username');
+        $.ajax({
+            type: 'DELETE',
+            url: '/admin',
+            data: {username: username},
+            dataType: 'json',
+            success: function (arg) {
+                if (arg.status) {
+                    layui.use('layer', function(){
+                      var layer = layui.layer;
+                      layer.msg('删除成功!');
+                    });
+                    window.location.reload()
+                } else {
+                    console.log(arg);
+                    layui.use('layer', function(){
+                      var layer = layui.layer;
+                      var message = '删除失败!' + arg.message;
+                      layer.msg(message);
+                    });
+                }
+            }
+        });
+    }
+  function AddUerClick() {
+      $('.click-out').removeClass('hide');
+      $('.body').addClass('hide');
+  }
+
+  function AddUer(){
+      var username = $('#username').val();
+      var password = $('#password').val();
+//      console.log(username,password);
+      $.ajax({
+          type:'POST',
+          url: '/admin',
+          data: {'username': username,'password':password},
+          dataType: 'json',
+          success: function(arg){
+              console.log(arg);
+              if(arg.status !== 'false'){
+                    $('.add-notify').text(arg.message);
+                    window.location.reload();
+              }else{
+                  var error_msg = '添加失败:' + arg.message;
+                    $('.add-notify').text(error_msg);
+              }
+          }
+      });
+
+  }
+</script>
+{% end %}
