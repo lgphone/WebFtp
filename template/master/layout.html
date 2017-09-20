@@ -1,74 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Prozhi.com</title>
-<link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
-<link rel="stylesheet" href="static/layui/css/layui.css">
-<style>
-	.layui-logo a {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		height: 100%;
-		line-height: 60px;
-		text-align: center;
-		color: #009688;
-		font-size: 16px;
-	}
-	.layui-body {
-		padding:15px;
-	}
-</style>
-{% block CSS %} {% end %}
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>Prozhi.com</title>
+	<script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css')}}">-->
+	<style>
+		.body {
+			margin-top: 50px;
+			padding-bottom: 70px;
+		}
+
+		.left-menu {
+			height: 100%;
+		}
+		.left-menu > .menu-item {
+			line-height: 40px;
+		}
+		.left-menu > .active {
+			background-color: #1E9FFF;
+			color: #fff;
+		}
+	</style>
+	{% block CSS %} {% end %}
 </head>
 <body>
-	<div class="layui-layout layui-layout-admin">
-	  <div class="layui-header">
-		<div class="layui-logo"><a href="/index">FTP</a></div>
-		<!-- 头部区域（可配合layui已有的水平导航） -->
-		<ul class="layui-nav layui-layout-left">
-		  <li class="layui-nav-item"><a href="">控制台</a></li>
-		</ul>
-		<ul class="layui-nav layui-layout-right">
-			<li class="layui-nav-item"><a>欢迎你! {{username}}</a></li>
-		  	<li class="layui-nav-item"><a href="/logout?logout={{ username }}" class="logout">退出</a></li>
-		</ul>
-	  </div>
+    <!--导航栏-->
+    <!--使用navbar-fixed-top固定到顶部-->
+    <nav class="nav navbar-default navbar-fixed-top" role="navigation">
+        <!--使用流布局-->
+        <div class="container-fluid">
+            <!--指定logo位置及图片-->
+            <div class="navbar-header">
+                <a href="/index" class="navbar-brand">Ftp文件上传下载系统</a>
+            </div>
+            <div class="collapse navbar-collapse" id="menu">
+                <!--菜单栏-->
+                <!--使用位置来指定放在那里-->
+                <ul class="nav navbar-nav navbar-right">
+                    <!--超链接-->
+					<li class="layui-nav-item"><a>欢迎你! {{username}}</a></li>
+		  			<li class="layui-nav-item"><a href="/logout">退出</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-	  <div class="layui-side layui-bg-black">
-		<div class="layui-side-scroll">
-		  <ul class="layui-nav layui-nav-tree" >
-			  <li class="layui-nav-item">
-				  <a><div class="time"><h2></h2></div></a>
-			  </li>
-			  <li class="layui-nav-item">
-				<a href="javascript:;">FTP上传文件</a>
-			  </li>
-		  </ul>
+	<div class="container-fluid body">
+		<div class="row content">
+			<div class="col-md-2">
+				<div class="row left-menu">
+					<div class="col-md-12 menu-item time"><h5></h5></div>
+					<div class="col-md-12 menu-item active">Dashboard</div>
+					<div class="col-md-12 menu-item">什么都没有</div>
+				</div>
+			</div>
+			<div class="col-md-10 body-data">
+				{% block Body %} {% end %}
+			</div>
+			<div class="row">
+				<div class="col-md-12 text-center navbar-fixed-bottom">© Thorgene</div>
+			</div>
 		</div>
-	  </div>
-
-	  <div class="layui-body">
-		{% block Body %} {% end %}
-	  </div>
-
-	  <div class="layui-footer">
-		© Thorgene
-	  </div>
 	</div>
-	<script src="static/plugins/jquery-1.12.4.js"></script>
-    <script src="static/plugins/jquery.cookie.js"></script>
-	<script src="static/layui/layui.js"></script>
-	<script>
-		//JavaScript代码区域
-		layui.use('element', function(){
-		  var element = layui.element;
 
-		});
-	</script>
 
 	<script>
 		/* Ajax 初始化请求操作*/
@@ -92,10 +91,10 @@
 			var cd = data.getDate();
 			var cj = data.getDay();
 			var cdata = '星期' + cj + ' ' + cy + '年' + cm + '月' + cd + '日';
-			if($('.time>h2').text().indexOf(":") > 0 ){
-				$('.time>h2').text(ctime + ' | ' + cdata);
+			if($('.time>h5').text().indexOf(":") > 0 ){
+				$('.time>h5').text(ctime + ' | ' + cdata);
 			}else{
-				$('.time>h2').text(ctime_m + ' | ' + cdata);
+				$('.time>h5').text(ctime_m + ' | ' + cdata);
 			}
 		}
 

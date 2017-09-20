@@ -1,39 +1,11 @@
 {% extends '../master/layout.html'%}
 {% block CSS%}
 <style>
-  .layui-input-block {
-    margin-bottom:30px;
+  .modal-err-msg {
+    color: red;
+    font-weight: bold;
   }
-  .layui-table {
-    width: 1000px;
-  }
-  .add-user-form {
-    position: absolute;
-    /*z-index: 1200;*/
-    margin: 0 auto;
-    /*width: 300px;*/
-    /*height: 200px;*/
-  }
-  .hide{
-    display: none;
-  }
-
-  .click-out {
-    /*background-color: #33CCFF;*/
-    z-index: 15000;
-    /*position: fixed;*/
-    /*margin-top:0;*/
-    width: 600px;
-    height: 300px;
-  }
-  .add-user-form {
-    margin-top: 40px;
-    margin-left: 50px;
-
-  }
-  .add-notify {
-    margin: 20px;
-    margin-left: 60px;
+  .del-username {
     color: red;
     font-weight: bold;
   }
@@ -41,72 +13,125 @@
 {% end %}
 
 {% block Body %}
-
-<div class="layui-form body">
-  <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal add-user" onclick="AddUerClick();">添加用户</button>
-  <table class="layui-table">
-    <colgroup>
-      <col width="150">
-      <col width="150">
-      <col width="260">
-      <col width="100">
-      <col>
-    </colgroup>
-    <thead>
-      <tr>
-        <th>用户名</th>
-        <th>密码</th>
-        <th>创建时间</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for user in user_list %}
-      <tr>
-        <td>{{ user[0] }}</td>
-        <td>{{ user[1] }}</td>
-        <td>{{ user[2] }}</td>
-        <td><button username="{{ user[0] }}" class="layui-btn layui-btn-danger del-user" onclick="DelUser(this);">删除用户</button></td>
-      </tr>
-      {% end %}
-    </tbody>
-  </table>
-  <div class="Model"></div>
+<br>
+<div class="row">
+  <div class="col-md-8 col-md-offset-1">
+    <div class="row">
+        <div id="error-msg" class="alert alert-danger col-md-6 error-msg hide" role="alert"></div>
+    </div>
+      <form class="form-horizontal">
+          <div class="form-group">
+              <div class="col-md-2"><button type="button" class="btn btn-primary add-user" data-toggle="modal" data-target="#addUerModal">添加用户</button></div>
+          </div>
+      </form>
+  </div>
+</div>
+<br>
+<div class="row">
+  <div class="col-md-5 col-md-offset-1">
+    <table class="table table-bordered">
+      <colgroup>
+        <col width="100">
+        <col width="100">
+        <col width="250">
+        <col>
+      </colgroup>
+      <thead>
+        <tr class="info">
+          <th class="text-center">用户名</th>
+          <th class="text-center">密码</th>
+          <th class="text-center">创建时间</th>
+          <th class="text-center">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in user_list %}
+          <tr>
+            <td>{{ user[0] }}</td>
+            <td>{{ user[1] }}</td>
+            <td>{{ user[2] }}</td>
+            <td class="text-center"><button username="{{ user[0] }}" type="button" class="btn btn-warning del-user" data-toggle="modal" data-target="#delUerModal" onclick="delUserName(this);">删除用户</button></td>
+          </tr>
+        {% end %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div class="click-out hide">
-  <div class="add-user-form site-text site-block">
-    <div class="layui-form">
-      <div class="layui-form-item">
-        <label class="layui-form-label">用户</label>
-        <div class="layui-input-inline">
-          <input type="text" id="username" required="" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
-        </div>
+<!-- addUser Modal -->
+<div class="modal fade" id="addUerModal" tabindex="-1" role="dialog" aria-labelledby="addUerModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addUerModalLabel">添加用户:</h4>
       </div>
-      <div class="layui-form-item">
-        <label class="layui-form-label">密码</label>
-        <div class="layui-input-inline">
-          <input type="password" id="password" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input" >
-        </div>
+      <div class="modal-body">
+        <form class="form-horizontal add-user-form">
+            <div class="form-group">
+                <label for="username" class="col-sm-2 control-label">用户名:</label>
+                <div class="col-md-4">
+                    <input type="text" name="username" class="form-control" id="username" placeholder="请输入用户名">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="username" class="col-sm-2 control-label">密码:</label>
+                <div class="col-md-4">
+                    <input type="text" name="password" class="form-control" id="password" placeholder="请输入密码">
+                </div>
+            </div>
+          <div class="form-group">
+            <div class="col-md-6 modal-err-msg"></div>
+          </div>
+        </form>
       </div>
-      <div class="layui-form-item">
-        <div class="layui-input-block">
-          <button class="layui-btn" onclick="AddUer();">立即提交</button>
-          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="addUer();">确认添加</button>
       </div>
-
     </div>
   </div>
-<div class="add-notify"></div>
 </div>
+
+<!-- delUser Modal -->
+<div class="modal fade" id="delUerModal" tabindex="-1" role="dialog" aria-labelledby="delUerModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delUerModalLabel">删除用户:</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal add-user-form">
+            <div class="form-group">
+                <div class="col-md-6 del-username">
+                </div>
+            </div>
+          <div class="form-group">
+            <div class="col-md-6 modal-err-msg"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger" onclick="delUser();">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% end %}
 
 {% block JS %}
 <script>
-    function DelUser(ths) {
+    function delUserName(ths) {
         var username = $(ths).attr('username');
+        $('.del-username').text('你确定要删除用户 ' + username + ' 吗？').attr('username',username);
+    }
+
+    function delUser() {
+        var username = $('.del-username').attr('username');
         $.ajax({
             type: 'DELETE',
             url: '/admin',
@@ -114,48 +139,39 @@
             dataType: 'json',
             success: function (arg) {
                 if (arg.status) {
-                    layui.use('layer', function(){
-                      var layer = layui.layer;
-                      layer.msg('删除成功!');
-                    });
+                    console.log('删除成功!');
                     window.location.reload()
                 } else {
                     console.log(arg);
-                    layui.use('layer', function(){
-                      var layer = layui.layer;
-                      var message = '删除失败!' + arg.message;
-                      layer.msg(message);
-                    });
+                    var message = '删除失败!' + arg.message;
+                    console.log(message);
                 }
             }
         });
     }
-  function AddUerClick() {
-      $('.click-out').removeClass('hide');
-      $('.body').addClass('hide');
-  }
 
-  function AddUer(){
-      var username = $('#username').val();
-      var password = $('#password').val();
-//      console.log(username,password);
-      $.ajax({
-          type:'POST',
-          url: '/admin',
-          data: {'username': username,'password':password},
-          dataType: 'json',
-          success: function(arg){
-              console.log(arg);
-              if(arg.status !== 'false'){
-                    $('.add-notify').text(arg.message);
+  function addUer(){
+        var post_dict = {};
+//      获取每一个input中的值
+        $('.add-user-form input').each(function(){
+            post_dict[$(this).attr("name")] = $(this).val();
+        });
+        console.log(post_dict);
+        $.ajax({
+            type:'POST',
+            url: '/admin',
+            data: post_dict,
+            dataType: 'json',
+            success: function(arg){
+                console.log(arg);
+                if(arg.status !== 'false'){
+                    $('.modal-err-msg').text(arg.message);
                     window.location.reload();
-              }else{
-                  var error_msg = '添加失败:' + arg.message;
-                    $('.add-notify').text(error_msg);
-              }
-          }
-      });
-
+                }else{
+                    $('.modal-err-msg').text(arg.message);
+                }
+            }
+        });
   }
 </script>
 {% end %}

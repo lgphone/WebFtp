@@ -15,14 +15,36 @@ class IndexHandler(BaseHandler):
             file_list.append([obj.file_name, obj.md5, obj.size, obj.created_date])
         self.render('index/index.html', file_list=file_list, username=self.get_current_user())
 
+    def post(self):
+        ret = {'status': 'true', 'message': '', 'data': ''}
+        file_md5 = self.get_argument("file_md5", None)
+        file_name = self.get_argument("file_name", None)
+        if file_md5 and file_name:
+            f_obj = Files().select().where(Files.md5 == file_md5).first()
+            f_path = os.path.join(DOWNLOAD_DIR, file_name)
+            if f_obj:
+                try:
+                    Files.delete().where(Files.md5 == file_md5).execute()
+                    os.remove(f_path)
+                    ret['message'] = '删除成功'
+                except Exception as e:
+                    print(e)
+                    ret['status'] = 'false'
+                    ret['message'] = '删除失败'
+        else:
+            ret['status'] = 'false'
+            ret['message'] = '所删文件不存在'
+        self.write(json.dumps(ret))
+
+
 class UploadFileNginxHandle(BaseHandler):
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
         ret = {'status': 'true', 'message': '', 'data': ''}
-        file_name = self.get_argument("file_name")
-        tmp_path = self.get_argument("tmp_path")
-        md5 = self.get_argument("md5")
-        size = self.get_argument("size")
+        file_name = self.get_argument("file_name", None)
+        tmp_path = self.get_argument("tmp_path", None)
+        md5 = self.get_argument("md5", None)
+        size = self.get_argument("size", None)
         if file_name and tmp_path and md5 and size:
             file_path = os.path.join(DOWNLOAD_DIR, file_name)
             os.rename(tmp_path, file_path)
@@ -59,7 +81,7 @@ class AdminHandle(tornado.web.RequestHandler):
             except Exception as e:
                 print(e)
                 ret['status'] = 'false'
-                ret['message'] = '添加失败，数据库写入失败'
+                ret['message'] = '添加失败，此用户已经存在或者其他问题'
         else:
             ret['status'] = 'false'
             ret['message'] = '用户名或者密码没有填写'
@@ -73,7 +95,8 @@ class AdminHandle(tornado.web.RequestHandler):
                 return self.write(json.dumps(ret))
             else:
                 ret['status'] = 'false'
-                ret['message'] ='删除失败'
+                ret['message'] = '删除失败'
         else:
             ret['status'] = 'false'
             ret['message'] = '没有用户'
+        return self.write(json.dumps(ret))

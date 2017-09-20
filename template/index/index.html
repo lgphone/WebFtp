@@ -2,7 +2,8 @@
 {% block CSS%}
 <style>
   .tips {
-    margin: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     font-weight: bold;
     color: #1E9FFF;
     font-size: large;
@@ -10,11 +11,7 @@
   #file{
     margin-bottom:20px;
   }
-  .layui-input-block {
-    margin-bottom:30px;
-  }
   .file_info {
-    margin-bottom: 20px;
     font-weight: bold;
     font-size: medium;
     color: red;
@@ -25,48 +22,58 @@
     color: #009688;
     font-size: medium;
   }
-  .layui-table {
-    width: 1000px;
-  }
+
 </style>
 {% end %}
 
 {% block Body %}
 
-<div class="layui-form">
-  <div class="tips">请在下面提交文件点击上传即可</div>
-  <div class="layui-form-item">
-    <label class="layui-form-label"></label>
-    <div class="layui-input-inline">
-      <input type="file" name="file" id="file" onchange="file_info();">
+<div class="row">
+  <div class="col-md-8 col-md-offset-1">
+    <div class="row">
+        <div class="tips">请在下面提交文件点击上传即可</div>
+        <div id="error-msg" class="alert alert-danger col-md-6 error-msg hide" role="alert"></div>
     </div>
+      <form class="form-horizontal">
+          <div class="form-group">
+              <div class="col-md-5">
+                  <input type="file" id="file" class="hide" onchange="file_info();"/>
+                  <input type="text" id="file_path" class="form-control" disabled/>
+              </div>
+              <div class="col-md-2"><button type="button" class="btn btn-default" onclick="$('#file').click();">选择文件</button></div>
+          </div>
+          <div class="form-group">
+              <label class="col-md-2 file_info" for="upload_file_status">文件信息:</label>
+              <div class="col-md-6 upload_file_status" id="upload_file_status"></div>
+          </div>
+          <div class="form-group">
+              <div class="col-md-2">
+                  <button type="button" class="btn btn-info upload_button" onclick="UploadFile(this);">上传文件</button>
+              </div>
+          </div>
+      </form>
   </div>
-  <div class="layui-form-item">
-    <div class="layui-input-block">
-      <button class="layui-btn upload_button" onclick="UploadFile(this);">上传文件</button>
-    </div>
-    <div class="layui-input-block">
-      <div class="file_info">文件信息</div>
-      <div class="upload_file_status"></div>
-    </div>
-  </div>
-  {% raw xsrf_form_html() %}
-  <table class="layui-table">
+</div>
+
+<br>
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+  <table class="table table-bordered">
     <colgroup>
       <col width="300">
       <col width="150">
       <col width="150">
       <col width="260">
-      <col width="100">
+      <col width="200">
       <col>
     </colgroup>
     <thead>
-      <tr>
-        <th>文件名</th>
-        <th>文件MD5</th>
-        <th>文件大小</th>
-        <th>创建时间</th>
-        <th>下载按钮</th>
+      <tr class="info">
+        <th class="text-center">文件名</th>
+        <th class="text-center">文件MD5</th>
+        <th class="text-center">文件大小</th>
+        <th class="text-center">创建时间</th>
+        <th class="text-center">下载按钮</th>
       </tr>
     </thead>
     <tbody>
@@ -76,35 +83,73 @@
         <td>{{ file[1] }}</td>
         <td>{{ file[2] }}</td>
         <td>{{ file[3] }}</td>
-        <td><a href="/download/{{ file[0] }}" class="layui-btn">下载</a></td>
+        <td class="text-center">
+            <a href="/download/{{ file[0] }}" class="btn btn-info btn-sm ">下载</a>
+            <button type="button" class="btn btn-warning btn-sm" f_name="{{ file[0] }}" f_md5="{{ file[1] }}" data-toggle="modal" data-target="#delFileModal" onclick="delFileMd5(this);">删除</button>
+        </td>
       </tr>
       {% end %}
     </tbody>
   </table>
+  </div>
+</div>
+
+<!-- addUser Modal -->
+<div class="modal fade" id="delFileModal" tabindex="-1" role="dialog" aria-labelledby="delFileModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delFileModalLabel">删除文件:</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal add-user-form">
+            <div class="form-group">
+                <div class="col-md-6">确实要删除以下文件？</div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-6 del-file-name"></div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-6 del-file-md5"></div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-6 modal-err-msg"></div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger" onclick="delFile();">确认删除</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% end %}
 
 {% block JS %}
 <script>
   function file_info() {
+      $('#file_path').val($("#file").val());
       var fileObj = $("#file")[0].files[0];
       var fname = fileObj.name;
       var fsize = fileObj.size;
-      var file_status = '文件名:' + fname + '  大小:' +  fsize/1024/1024 + ' MB';
+      var fsize_n = fsize/1024/1024;
+      var fsize_arr = fsize_n.toString().split('.');
+      var fsize_m = fsize_arr[0] + '.' + fsize_arr[1].substring(0,2);
+      console.log(fsize_arr);
+      var file_status = '文件名:' + fname + '  大小:' +  fsize_m + ' MB';
       $('.upload_file_status').text(file_status);
   }
 
   function UploadFile(){
       var fileObj = $("#file")[0].files[0];
-      console.log(fileObj);
+//      console.log(fileObj);
       if (typeof(fileObj) === 'undefined'){
-          layui.use('layer', function(){
-            var layer = layui.layer;
-            layer.msg('请先选择文件');
-          });
+          $('#error-msg').text('请先选择文件').removeClass('hide');
           return
       }
-      $('.upload_button').text('上传中....').addClass('layui-btn-disabled').attr("disabled","true");
+      $('.upload_button').text('上传中....').addClass('disabled').attr("disabled","true");
       var form = new FormData();
       form.append("upload_file", fileObj);
       $.ajax({
@@ -117,22 +162,41 @@
               arg = JSON.parse(arg);
               console.log(arg);
               if(arg.status){
-                    layui.use('layer', function(){
-                      var layer = layui.layer;
-                      layer.msg('上传成功');
-                    });
-                    $('.upload_button').text('上传文件').removeClass('layui-btn-disabled').removeAttr('disabled');
-                    window.location.reload()
+                  window.location.reload();
               }else{
                   var error_msg = '上传失败:' + arg.message;
-                  layui.use('layer', function(){
-                      var layer = layui.layer;
-                      layer.msg(error_msg);
-                    });
-//                  console.log(arg.message);
+                  $('#error-msg').text(error_msg).removeClass('hide');
               }
           }
       });
+  }
+
+  function delFileMd5(ths) {
+        var f_name = $(ths).attr('f_name');
+        var f_md5 = $(ths).attr('f_md5');
+        $('.del-file-name').text('文件名：' + f_name).attr('f_name',f_name);
+        $('.del-file-md5').text('文件MD5：' + f_md5).attr('f_md5',f_md5);
+  }
+
+
+  function delFile() {
+      var file_md5 =  $('.del-file-md5').attr('f_md5');
+      var file_name =  $('.del-file-name').attr('f_name');
+      $.ajax({
+            type:'POST',
+            url: '/index',
+            data: {'file_md5':file_md5,'file_name':file_name},
+            dataType: 'json',
+            success: function(arg){
+                console.log(arg);
+                if(arg.status !== 'false'){
+                    $('.modal-err-msg').text(arg.message);
+                    window.location.reload();
+                }else{
+                    $('.modal-err-msg').text(arg.message);
+                }
+            }
+        });
   }
 
 </script>

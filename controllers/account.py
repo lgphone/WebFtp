@@ -5,7 +5,7 @@ import json
 
 class BaseHandler(RequestHandler):
     def get_current_user(self):
-        return self.get_secure_cookie("username")
+        return self.get_secure_cookie("username", None)
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -13,8 +13,8 @@ class LoginHandler(BaseHandler):
 
     def post(self):
         ret = {'status': 'true', 'message': ''}
-        username = self.get_argument("username")
-        password = self.get_argument("password")
+        username = self.get_argument("username", None)
+        password = self.get_argument("password", None)
         # print(username, password)
         obj = User().select().where(User.username == username, User.password == password).first()
         if obj:
@@ -26,10 +26,7 @@ class LoginHandler(BaseHandler):
 
 
 class LogoutHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
-        if (self.get_argument("logout", None)):
-            self.clear_cookie("username")
-            self.redirect("/login")
-        else:
-            self.redirect("/login")
-
+        self.clear_cookie("username")
+        self.redirect("/login")
