@@ -1,7 +1,7 @@
 # WebFtp
 ## 基于Tornado + Nginx 设计的上传下载服务器
 * 数据库使用 sqlite3 和 peewee ORM
-* 前端使用了Layui 框架，刚弄几天我现在还没搞懂layui的弹出框，没用精髓，只用了界面...
+* 前端使用了Bootsrap 框架
 * 基于Tornado的secure_cookie 进行用户认证
 ## 实现功能：
 * 用户登录登出
