@@ -130,3 +130,4 @@ DOWNLOAD_DIR = '/tmp/upload_tmp'
 
 ## 暂时就这些
 下一步会添加进度条显示，也是依赖于nginx的一个补丁实现的
+# add test
